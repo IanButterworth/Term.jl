@@ -14,12 +14,12 @@ struct AppInternals
     help_shown::Bool
 end
 
-`AppInternals` handles "under the hood" work for live widgets. 
+`AppInternals` handles "under the hood" work for live widgets.
 It takes care of keeping track of information such as the content
 displayed at the last refresh of the widget to inform the printing
 of the widget's content at the next refresh.
 
-AppInternals also holds linked_widgets which can be used to link to 
+AppInternals also holds linked_widgets which can be used to link to
 other widgets to access their internal variables.
 """
 @with_repr mutable struct AppInternals
@@ -40,9 +40,9 @@ other widgets to access their internal variables.
         iob = IOBuffer()
         ioc = IOContext(iob, :displaysize => displaysize(stdout))
 
-        # prepare terminal 
+        # prepare terminal
         raw_mode_enabled = try
-            raw!(terminal, true)
+            raw!(active_terminal(), true)
             true
         catch err
             @debug "Unable to enter raw mode: " exception = (err, catch_backtrace())
@@ -50,11 +50,11 @@ other widgets to access their internal variables.
         end
 
         # hide the cursor
-        raw_mode_enabled && print(terminal.out_stream, "\x1b[?25l")
+        raw_mode_enabled && print(active_terminal().out_stream, "\x1b[?25l")
         return new(
             iob,
             ioc,
-            terminal,
+            active_terminal(),
             nothing,
             String[],
             raw_mode_enabled,
@@ -297,7 +297,7 @@ end
 """
     enforce_app_size(app::App, measure::Measure)
 
-Called when a console is resized to adjust the apps layout. 
+Called when a console is resized to adjust the apps layout.
 """
 function enforce_app_size(app::App, measure::Measure)
     compositor = Compositor(app.layout; max_w = measure.w, max_h = measure.h)
@@ -417,7 +417,7 @@ end
 """
     replace_line(internals::AppInternals, newline)
 
-Erase a line, write new content and move cursor. 
+Erase a line, write new content and move cursor.
 """
 function replace_line(internals::AppInternals, newline)
     erase_line(internals.ioc)
@@ -431,7 +431,7 @@ Update the terminal display of a app.
 
 this is done by calling `frame` on the app to get the new content.
 Then, line by line, the new content is compared to the previous one and when
-a discrepancy occurs the lines gets re-written. 
+a discrepancy occurs the lines gets re-written.
 This is all done printing to a buffer first and then to `stdout` to avoid
 jitter.
 """
@@ -518,7 +518,7 @@ end
 """
     play(app::App; transient::Bool=true)
 
-Keep refreshing a renderable, until the user interrupts it. 
+Keep refreshing a renderable, until the user interrupts it.
 """
 function play(app::App; transient::Bool = true)
     Base.start_reading(stdin)

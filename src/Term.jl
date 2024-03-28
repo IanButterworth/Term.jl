@@ -49,6 +49,12 @@ default_width(io = stdout)::Int =
 default_stacktrace_width(io = stderr)::Int =
     min(DEFAULT_STACKTRACE_WIDTH[], something(ACTIVE_CONSOLE_WIDTH[], displaysize(io)[2]))
 
+if Base.VERSION < v"1.12.0-0"
+    active_terminal() = REPL.TerminalMenus.terminal # used to be a global variable
+else
+    active_terminal() = REPL.Terminals.default_terminal()
+end
+
 const DEFAULT_ASPECT_RATIO = Ref(4 / 3)  # 4:3 - 16:9 - 21:9
 
 # general utils
@@ -148,7 +154,7 @@ Measures.height(seg::Segment) = seg.measure.h
 Measures.height(ren::AbstractRenderable) = ren.measure.h
 
 """
-    Measure(seg::Segment) 
+    Measure(seg::Segment)
 
 gives the measure of a segment
 """

@@ -1,5 +1,5 @@
 module LiveWidgets
-using REPL.TerminalMenus: readkey, terminal
+using REPL.TerminalMenus: readkey
 using REPL.Terminals: raw!, AbstractTerminal
 using Dates
 import Base.Docs: doc as getdocs
